@@ -3,11 +3,16 @@ var inputValueDescription = document.querySelector('.inputDescription'); // The 
 var inputValueDeadline = document.querySelector('.inputDeadline'); // The description of the todo-item
 const add = document.querySelector('.add'); // add button
 
+let todoList = []; // Contains all the todo-items
+
 class item{
-    // Class representin one todo item with a description and a deadline
+    
+    // Class representing one todo item with a description and a deadline
 	constructor(description, deadline){
 		this.createItem(description, deadline);
 	}
+
+    
     createItem(description, deadline){
 
         // Create the HTML of todo and fill with description and deadline
@@ -42,7 +47,7 @@ class item{
     	var remove = document.createElement('button');
     	remove.classList.add('m-1', 'btn','btn-md','btn-danger');
     	remove.innerHTML = "REMOVE";
-    	remove.addEventListener('click', () => this.remove(itemBox, description));
+    	remove.addEventListener('click', () => this.remove(itemBox, description, deadline));
 
         container.appendChild(itemBox);
 
@@ -50,7 +55,19 @@ class item{
         itemBox.appendChild(edit);
         itemBox.appendChild(remove);
 
+         // Add todo to database
+        var http = new XMLHttpRequest();
+        var url = 'http://localhost:8086/addTodo';
+        http.open('POST', url, true);
+        http.setRequestHeader("Content-Type", "application/json");
+        http.send(JSON.stringify({"description" : description, "progress" : 0, "done" : false, "date" : deadline}));
+        
+        // Add todo to list
+        todoList.push(description);
+
+        console.log(todoList);
     }
+
 
     // Edit and Remove Button
     edit(input, date,  description){
@@ -64,9 +81,24 @@ class item{
         }
     }
 
-    remove(itemBox, description){
+    remove(itemBox, description, deadline){
+        // Functionality Delete Button
+
+        // Remove todo from database
+        // TODO: Not working. Request blocked due to 'CORS Header missing'
+        var http = new XMLHttpRequest();
+        var url = 'http://localhost:8086/deleteTodo';
+        http.open('DEL', url, true);
+        http.setRequestHeader("Content-Type", "application/json");
+        http.send(JSON.stringify({"description" :  description, "progress" : 0, "done" : false, "date" : deadline}));
+
+        // Remove todo from list
+        todoList.splice(todoList.indexOf(description), 1)
+
+        // Remove todo from page
         itemBox.parentNode.removeChild(itemBox);
 
+        // console.log(todoList);
     }
 }
 
@@ -78,3 +110,4 @@ function check(){
         inputValueDeadline.value = "";
 	}
 }
+
